@@ -1,0 +1,32 @@
+name: Send Full PR Diff on Merge
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  send-diff:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true  # Run only if PR is merged
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history to get all PR commits
+
+      - name: Get Full PR Diff
+        run: |
+          BASE_SHA=${{ github.event.pull_request.base.sha }}  # Base branch commit before merge
+          MERGE_SHA=${{ github.event.pull_request.merge_commit_sha }}  # Merge commit SHA
+          git diff $BASE_SHA $MERGE_SHA > pr-diff.txt
+          echo "Git diff between $BASE_SHA and $MERGE_SHA saved"
+
+      - name: Send Diff to API
+        env:
+          API_URL: "https://6989-103-37-201-222.ngrok-free.app/workflow" 
+        run: |
+          curl -X POST "$API_URL" \
+          -H "Content-Type: application/json" \
+          --data-binary @pr-diff.txt
