@@ -28,5 +28,6 @@ jobs:
           API_URL: "https://6989-103-37-201-222.ngrok-free.app/workflow" 
         run: |
           curl -X POST "$API_URL" \
-          -H "Content-Type: application/json" \
-          --data-binary @pr-diff.txt
+            -H "Content-Type: text/plain" \
+            --data-binary @pr-diff.txt
+
